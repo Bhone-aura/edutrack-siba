@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+
+* { box-sizing: border-box; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+p, ul, ol {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* Dark-mode contrast improvements: scoped overrides to increase legibility */
+:root{
+  --et-bg: #d6e1f9;    /* page background = white */
+  --et-card: #f8fafc;  /* very light gray card surfaces */
+  --et-top: #ffffff;   /* header / sidebar = white */
+  --et-text: #0f1724;  /* primary text */
+  --et-muted: #6b7280; /* muted text (gray) */
+}
+.dark{
+  --et-bg: #071026; /* page background in dark mode */
+  --et-card: #0b2433; /* surface / card background - slightly lighter for better contrast */
+  --et-text: #e6eef8; /* primary text */
+  --et-muted: #9aa8bf; /* secondary text */
+}
+
+/* Apply base background/text using variables so contrast is consistent */
+html, body, #root { background-color: var(--et-bg); color: var(--et-text); }
+
+/* Ensure header/aside use neutral white/gray surfaces in light mode */
+header, aside {
+  background-color: var(--et-top) !important;
+  border: 1px solid #eef2f7 !important; /* subtle neutral border */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Force header (top bar) to white in light mode */
+html:not(.dark) header {
+  background-color: #ffffff !important;
+  color: var(--et-text) !important;
+}
+
+/* Sidebar/theme button: inherit default color/weight so Tailwind utility classes control appearance */
+aside button[aria-label="Toggle theme"],
+aside .p-2.rounded-md, aside .px-2.py-1 {
+  color: inherit !important;
+  font-weight: 500 !important;
+}
+
+/* Neutral light surfaces for utility class */
+.bg-slate-100 {
+  background-color: #f1f5f9 !important; /* neutral light-gray */
+  color: inherit !important;
+}
+
+/* Make common muted text slightly brighter in dark mode */
+.dark .text-slate-500, .dark .text-slate-400, .dark .text-slate-300 {
+  color: var(--et-muted) !important;
+}
+.dark .text-slate-200 {
+  color: #cbd5e1 !important;
+}
+
+/* Make card / panel backgrounds a bit lighter than page background for separation */
+.dark .bg-slate-800, .dark .bg-white, .dark .bg-slate-50 {
+  background-color: var(--et-card) !important;
+}
+.dark .bg-slate-900 {
+  background-color: #071026 !important;
+}
+
+/* Slightly darker borders for better separation */
+.dark .border-slate-700 {
+  border-color: #1e3446 !important;
+}
+
+/* Keep indigo accents unchanged but ensure they’re readable */
+.dark .text-indigo-600 { color: #60a5fa !important; }
+
+/* Small helper: boost contrast for small, important labels */
+.dark .font-semibold, .dark .font-medium {
+  color: var(--et-text) !important;
+}
+
+/* Improve contrast for small action buttons in dark mode (Theme, Close, etc.) */
+.dark .bg-slate-100 {
+  /* Slightly lighter than the card surface so buttons stand out */
+  background-color: #12313f !important;
+  color: var(--et-text) !important;
+}
+/* Ensure <button> elements that use the utility class get readable text color */
+.dark button.bg-slate-100 { color: var(--et-text) !important; }
+/* Make small 'Close' labels more visible when they were using muted small text */
+.dark .text-sm.text-slate-500 { color: var(--et-text) !important; }
+
+/* Make site bar use card/gray surface in light mode only */
+html:not(.dark) aside {
+  background-color: var(--et-card) !important; /* light gray surface */
+}
+
+/* Light-mode: swap page background and header/aside (site bar) backgrounds */
+html:not(.dark), html:not(.dark) body, html:not(.dark) #root {
+  background-color: var(--et-card) !important; /* page becomes card (light gray) */
+  color: var(--et-text) !important;
+}
+html:not(.dark) header, html:not(.dark) aside {
+  background-color: var(--et-bg) !important; /* header/aside become white */
+  border: 1px solid #eef2f7 !important;
+}
+
+/* Ensure previous aside override (if present) does not conflict */
+html:not(.dark) aside {
+  background-color: var(--et-bg) !important;
+}
+
+/* Ensure any light-mode uses of the dark-slate background are replaced with requested light blue */
+html:not(.dark) .bg-slate-900,
+html:not(.dark) [style*="rgb(30 41 59"] {
+  background-color: rgb(179 205 247) !important;
+}
+
+/* Also override slate-900 utility in light mode if used with dark:bg variants */
+html:not(.dark) .dark\:bg-slate-900 {
+  background-color: rgb(179 205 247) !important;
+}
+
+/* Override generated prefers-color-scheme rule for .dark:bg-slate-800 as requested */
+@media (prefers-color-scheme: dark) {
+  .dark\:bg-slate-800 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(215, 219, 223) !important;
+  }
+}
+
+/* End of dark-mode tweaks */
+
+/* Light-mode: replace very light/white text colors with prominent dark text for readability */
+html:not(.dark) .text-white,
+html:not(.dark) .text-slate-50,
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200 {
+  color: var(--et-text) !important;
+}
+
+/* Also ensure buttons that used 'text-white' on colored backgrounds keep contrast if necessary
+   (override only when button background is light) */
+html:not(.dark) button.text-white:not([class*="bg-"]) {
+  color: var(--et-text) !important;
+}
+
+/* Light-mode: make hover backgrounds for menu/navigation lighter (keep dark mode as-is) */
+html:not(.dark) .hover\:bg-indigo-50:hover,
+html:not(.dark) .hover\:bg-indigo-50 {
+  background-color: rgb(212, 224, 235) !important; /* very light indigo */
+}
+
+html:not(.dark) .hover\:bg-slate-50:hover,
+html:not(.dark) .hover\:bg-slate-800 {
+  background-color: rgb(30 41 59 / 0.6) !important; /* very light neutral */
+}
+
+/* Also target common button hover utility if used directly */
+html:not(.dark) button:hover.hover\:bg-indigo-50,
+html:not(.dark) button:hover.hover\:bg-slate-100 {
+  background-color: rgb(153, 198, 243) !important;
+}
+
+/* Make assignment form inputs and textarea white in light mode */
+html:not(.dark) #assignment-form input,
+html:not(.dark) #assignment-form textarea,
+html:not(.dark) #assignment-form select,
+html:not(.dark) #assignment-form .bg-slate-50 {
+  background-color: #ffffff !important;
+  color: var(--et-text) !important;
+  border-color: #e6edf3 !important;
+}
+
+/* Light-mode: force mobile top bar (md:hidden .bg-white/60) to use semi-transparent white */
+html:not(.dark) .md\:hidden.bg-white\/60 {
+  background-color: rgb(255 255 255 / 60%) !important;
+}
+
+/* Light-mode: ensure panels that carry dark:bg-slate-800 remain white */
+html:not(.dark) .dark\:bg-slate-800 {
+  background-color: rgb(255 255 255) !important;
+}
+
+/* Light-mode: make places that use dark:text-slate-300 render with rgb(80 99 121) for readability */
+html:not(.dark) .dark\:text-slate-300 {
+  color: rgb(80 99 121) !important;
+}
+
+/* Light-mode: make inputs/selects/time fields that use bg-slate-50 white for schedule/class modal */
+html:not(.dark) input.bg-slate-50,
+html:not(.dark) select.bg-slate-50,
+html:not(.dark) textarea.bg-slate-50,
+html:not(.dark) input[type="time"].bg-slate-50 {
+  background-color: #ffffff !important;
+  color: var(--et-text) !important;
+  border-color: #e6edf3 !important;
+}

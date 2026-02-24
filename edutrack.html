@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en" class="antialiased">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EduTrack - School Organizer</title>
+
+  <!-- Tailwind CDN -->
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* small helper for glass/fab */
+    .fab {
+      width: 56px;
+      height: 56px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+    }
+    /* simple transition for section changes */
+    .section-hidden { display: none; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen">
+
+  <!-- Desktop layout: top bar + left sidebar (md+) -->
+  <div class="md:flex md:min-h-screen">
+    <!-- Sidebar (desktop) -->
+    <aside id="sidebar" class="hidden md:flex md:flex-col md:w-64 bg-white/60 dark:bg-slate-800/60 border-r border-slate-200 dark:border-slate-700 p-4">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">ET</div>
+        <div>
+          <div class="font-semibold">EduTrack</div>
+          <div class="text-sm text-slate-500 dark:text-slate-300">School Organizer</div>
+        </div>
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        <button data-section="dashboard" class="nav-link w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center gap-3">
+          <!-- Home icon -->
+          <svg class="w-5 h-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.5L12 4l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V10.5z"/></svg>
+          Dashboard
+        </button>
+        <button data-section="schedule" class="nav-link w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center gap-3">
+          <!-- Calendar icon -->
+          <svg class="w-5 h-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Schedule
+        </button>
+        <button data-section="assignments" class="nav-link w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center gap-3">
+          <!-- ClipboardList icon -->
+          <svg class="w-5 h-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6M9 16h6M8 7h8l1 2H7l1-2zM9 3h6a2 2 0 012 2v1H7V5a2 2 0 012-2zM5 8h14v11a2 2 0 01-2 2H7a2 2 0 01-2-2V8z"/></svg>
+          Assignments
+        </button>
+        <button data-section="settings" class="nav-link w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center gap-3">
+          <!-- Cog icon -->
+          <svg class="w-5 h-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317a1 1 0 01.95-.684h1.45a1 1 0 01.95.684l.286.9a1 1 0 00.95.684h.949a1 1 0 01.95.684l.286.9a1 1 0 00.95.684h.949M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"/></svg>
+          Settings
+        </button>
+      </nav>
+
+      <div class="mt-6 text-sm text-slate-500 dark:text-slate-300">
+        <div>Alex Student</div>
+        <div class="mt-2">
+          <label class="flex items-center gap-2">
+            <span class="text-xs">Dark</span>
+            <button id="sidebar-dark-toggle" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-xs">Toggle</button>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen flex flex-col">
+      <!-- Top bar (desktop) -->
+      <header class="hidden md:flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
+        <div class="flex items-center gap-4">
+          <div class="text-2xl font-bold text-indigo-600">EduTrack</div>
+          <div class="text-sm text-slate-500 dark:text-slate-300">Organize your school life</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="hidden md:flex items-center gap-2 text-sm">
+            <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">A</div>
+            <div class="text-slate-600 dark:text-slate-300">Alex Student</div>
+          </div>
+          <button id="top-dark-toggle" class="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700">
+            <!-- Sun / Moon -->
+            <svg id="top-dark-icon" class="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <!-- swapped by JS -->
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Mobile top small header -->
+      <div class="md:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">ET</div>
+          <div>
+            <div class="font-semibold">EduTrack</div>
+            <div class="text-xs text-slate-500 dark:text-slate-300">Alex Student</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="mobile-dark-toggle" class="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700">
+            <svg id="mobile-dark-icon" class="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content container -->
+      <main class="p-4 md:p-6 flex-1 overflow-y-auto">
+        <!-- Sections -->
+        <section id="dashboard" class="">
+          <!-- Header -->
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <div class="text-2xl font-bold flex items-center gap-3">
+                <span class="text-indigo-600">EduTrack</span>
+                <span class="text-sm text-slate-500 dark:text-slate-300">• Alex Student</span>
+              </div>
+              <div id="greeting" class="text-slate-600 dark:text-slate-300 mt-1">Good day, Alex!</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-sm text-slate-500 dark:text-slate-300 hidden md:block">Quick actions</div>
+              <button id="open-schedule" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Open Schedule</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Today's Classes -->
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow hover:shadow-lg transition">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-lg">Today's Classes</h3>
+                <div class="text-sm text-slate-500 dark:text-slate-300" id="today-date"></div>
+              </div>
+              <div id="today-classes-list" class="space-y-3">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+            <!-- Assignments Due Soon -->
+            <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow hover:shadow-lg transition">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-lg">Assignments Due Soon</h3>
+                <div class="text-sm text-slate-500 dark:text-slate-300">Next 7 days</div>
+              </div>
+              <div id="due-soon-list" class="space-y-3">
+                <!-- populated by JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="schedule" class="section-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Schedule</h2>
+            <div class="text-sm text-slate-500 dark:text-slate-300">View and manage classes</div>
+          </div>
+
+          <div class="mb-4">
+            <div id="day-selector" class="flex gap-2 overflow-x-auto">
+              <!-- day buttons inserted by JS -->
+            </div>
+          </div>
+
+          <div id="classes-for-day" class="space-y-4">
+            <!-- class cards -->
+          </div>
+
+          <!-- Floating add button -->
+          <button id="open-add-class" class="fixed right-4 bottom-20 md:bottom-8 md:right-8 fab bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 z-40">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </button>
+
+          <!-- Modal for add/edit class -->
+          <div id="class-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-lg">
+              <h3 id="class-modal-title" class="text-lg font-semibold mb-3">Add Class</h3>
+              <form id="class-form" class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="block">
+                    <div class="text-xs text-slate-500 mb-1">Day</div>
+                    <select id="class-day" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700">
+                      <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                    </select>
+                  </label>
+                  <label class="block">
+                    <div class="text-xs text-slate-500 mb-1">Room</div>
+                    <input id="class-room" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700" placeholder="e.g., Room 101" />
+                  </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <label>
+                    <div class="text-xs text-slate-500 mb-1">Start</div>
+                    <input id="class-start" type="time" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700" />
+                  </label>
+                  <label>
+                    <div class="text-xs text-slate-500 mb-1">End</div>
+                    <input id="class-end" type="time" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700" />
+                  </label>
+                </div>
+
+                <div>
+                  <div class="text-xs text-slate-500 mb-1">Subject</div>
+                  <input id="class-subject" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700" placeholder="e.g., Math" />
+                </div>
+                <div>
+                  <div class="text-xs text-slate-500 mb-1">Teacher</div>
+                  <input id="class-teacher" class="w-full rounded-lg p-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700" placeholder="e.g., Ms. Smith" />
+                </div>
+
+                <div class="flex items-center justify-end gap-2">
+                  <button type="button" id="cancel-class" class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-700">Cancel</button>
+                  <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Save</button>
+                </div>
+                <input type="hidden" id="class-id" />
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section id="assignments" class="section-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Assignments</h2>
+            <div class="text-sm text-slate-500 dark:text-slate-300">Track due dates & status</div>
+          </div>
+
+          <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow mb-4">
+            <div class="flex items-center gap-2 mb-3">
+              <button class="assign-filter px-3 py-1 rounded-lg bg-indigo-600 text-white" data-filter="all">All</button>
+              <button class="assign-filter px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200" data-filter="pending">Pending</button>
+              <button class="assign-filter px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200" data-filter="completed">Completed</button>
+              <div class="ml-auto text-sm text-slate-500 dark:text-slate-300">Add a new assignment</div>
+            </div>
+
+            <form id="assignment-form" class="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <input id="a-title" required placeholder="Title" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 col-span-1 md:col-span-1" />
+              <input id="a-subject" placeholder="Subject" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 col-span-1" />
+              <input id="a-due" type="date" class="p-2 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 col-span-1" />
+              <textarea id="a-desc" placeholder="Description (optional)" class="col-span-1 md:col-span-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-700"></textarea>
+              <div class="flex justify-end md:col-span-3">
+                <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Add Assignment</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="assignments-list" class="space-y-3">
+            <!-- populated by JS -->
+          </div>
+        </section>
+
+        <section id="settings" class="section-hidden">
+          <div class="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow">
+            <h3 class="font-semibold mb-3">Settings</h3>
+            <div class="flex items-center gap-4 mb-4">
+              <div>
+                <div class="text-sm text-slate-500 dark:text-slate-300">Dark mode</div>
+                <div class="text-xs text-slate-400 dark:text-slate-400">Toggle persistent dark theme</div>
+              </div>
+              <div class="ml-auto">
+                <button id="settings-dark-toggle" class="px-3 py-2 rounded-lg bg-indigo-600 text-white">Toggle Dark</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <button id="clear-data" class="px-4 py-2 rounded-lg bg-red-600 text-white">Clear all data</button>
+            </div>
+
+            <div class="text-sm text-slate-500 dark:text-slate-300">
+              School project by GitHub Copilot
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white/80 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 backdrop-blur z-50">
+    <div class="max-w-3xl mx-auto flex justify-around">
+      <button class="mobile-nav p-3 flex-1 flex flex-col items-center gap-1" data-section="dashboard">
+        <svg class="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 10.5L12 4l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V10.5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+        <span class="text-xs">Home</span>
+      </button>
+      <button class="mobile-nav p-3 flex-1 flex flex-col items-center gap-1" data-section="schedule">
+        <svg class="w-6 h-6 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+        <span class="text-xs">Calendar</span>
+      </button>
+      <button class="mobile-nav p-3 flex-1 flex flex-col items-center gap-1" data-section="assignments">
+        <svg class="w-6 h-6 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12h6M9 16h6M8 7h8l1 2H7l1-2zM9 3h6a2 2 0 012 2v1H7V5a2 2 0 012-2zM5 8h14v11a2 2 0 01-2 2H7a2 2 0 01-2-2V8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+        <span class="text-xs">Tasks</span>
+      </button>
+      <button class="mobile-nav p-3 flex-1 flex flex-col items-center gap-1" data-section="settings">
+        <svg class="w-6 h-6 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M10.325 4.317a1 1 0 01.95-.684h1.45a1 1 0 01.95.684l.286.9a1 1 0 00.95.684h.949a1 1 0 01.95.684l.286.9a1 1 0 00.95.684h.949M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+        <span class="text-xs">Settings</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    // Keys
+    const KEY_CLASSES = 'edutrack_classes';
+    const KEY_ASSIGNMENTS = 'edutrack_assignments';
+    const KEY_DARK = 'edutrack_dark';
+
+    // State
+    let classes = [];
+    let assignments = [];
+    let selectedDay = (new Date()).toLocaleDateString(undefined, { weekday: 'long' }); // e.g., "Tuesday"
+    let assignmentFilter = 'all';
+
+    // Utility
+    function saveClasses() { localStorage.setItem(KEY_CLASSES, JSON.stringify(classes)); }
+    function saveAssignments() { localStorage.setItem(KEY_ASSIGNMENTS, JSON.stringify(assignments)); }
+
+    // CRUD helpers for classes and assignments
+    function loadClasses() {
+      const raw = localStorage.getItem(KEY_CLASSES);
+      try { classes = raw ? JSON.parse(raw) : []; } catch (e) { classes = []; }
+    }
+
+    function addClass(obj) {
+      const item = { id: cryptoRandomId(), day: obj.day || 'Monday', startTime: obj.startTime || '', endTime: obj.endTime || '', subject: obj.subject || '', teacher: obj.teacher || '', room: obj.room || '' };
+      classes.push(item);
+      saveClasses();
+      return item;
+    }
+
+    function editClass(id, updates) {
+      const it = classes.find(c => c.id === id);
+      if (it) {
+        Object.assign(it, updates);
+        saveClasses();
+      }
+    }
+
+    function deleteClassById(id) {
+      classes = classes.filter(c => c.id !== id);
+      saveClasses();
+    }
+
+    // mark assignment complete and persist instantly
+    function markAssignmentComplete(id, completed) {
+      const it = assignments.find(a => a.id === id);
+      if (it) {
+        it.completed = !!completed;
+        saveAssignments();
+        renderAssignments();
+        if (!document.getElementById('dashboard').classList.contains('section-hidden')) renderDashboard();
+      }
+    }
+
+    function loadData() {
+      const rawC = localStorage.getItem(KEY_CLASSES);
+      const rawA = localStorage.getItem(KEY_ASSIGNMENTS);
+      if (!rawC && !rawA) {
+        // first load: create sample data
+        const today = new Date();
+        const dd = (d) => String(d).padStart(2,'0');
+        // sample classes
+        classes = [
+          { id: cryptoRandomId(), day: 'Monday', startTime: '08:30', endTime: '09:15', subject: 'Math', teacher: 'Ms. Rivera', room: '101' },
+          { id: cryptoRandomId(), day: 'Tuesday', startTime: '10:00', endTime: '11:00', subject: 'Science', teacher: 'Mr. Lee', room: 'Lab' },
+          { id: cryptoRandomId(), day: 'Wednesday', startTime: '13:00', endTime: '14:00', subject: 'History', teacher: 'Ms. Patel', room: '202' },
+          { id: cryptoRandomId(), day: 'Thursday', startTime: '09:00', endTime: '10:00', subject: 'English', teacher: 'Mrs. Gomez', room: '101' },
+          { id: cryptoRandomId(), day: 'Friday', startTime: '11:00', endTime: '12:00', subject: 'Art', teacher: 'Mr. Kim', room: 'Art Studio' }
+        ];
+        // sample assignments (dates relative)
+        function fmtDate(d){ const y=d.getFullYear(); const m=dd(d.getMonth()+1); const day=dd(d.getDate()); return `${y}-${m}-${day}`; }
+        const tomorrow = new Date(); tomorrow.setDate(today.getDate()+1);
+        const in3 = new Date(); in3.setDate(today.getDate()+3);
+        const in6 = new Date(); in6.setDate(today.getDate()+6);
+        const overdue = new Date(); overdue.setDate(today.getDate()-2);
+        assignments = [
+          { id: cryptoRandomId(), title: 'Algebra Homework', subject: 'Math', dueDate: fmtDate(tomorrow), description: 'Complete problems 1–20', completed: false },
+          { id: cryptoRandomId(), title: 'Lab Report', subject: 'Science', dueDate: fmtDate(in3), description: 'Write lab findings', completed: false },
+          { id: cryptoRandomId(), title: 'Reading: Chapter 4', subject: 'English', dueDate: fmtDate(in6), description: '', completed: false },
+          { id: cryptoRandomId(), title: 'History Essay', subject: 'History', dueDate: fmtDate(overdue), description: 'Submit final essay', completed: false }
+        ];
+        saveClasses();
+        saveAssignments();
+      } else {
+        try { classes = rawC ? JSON.parse(rawC) : []; } catch(e){ classes = []; }
+        try { assignments = rawA ? JSON.parse(rawA) : []; } catch(e){ assignments = []; }
+      }
+    }
+
+    function cryptoRandomId() {
+      return Math.random().toString(36).slice(2, 9);
+    }
+
+    function formatDateISOToPretty(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + 'T00:00:00');
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function isOverdue(isoDate) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const d = new Date(isoDate + 'T00:00:00');
+      return d < today;
+    }
+
+    function inNextNDays(isoDate, n) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const d = new Date(isoDate + 'T00:00:00');
+      const diff = (d - today)/(1000*60*60*24);
+      return diff >= 0 && diff <= n;
+    }
+
+    // Navigation
+    function showSection(id) {
+      document.querySelectorAll('main section').forEach(s => {
+        s.classList.add('section-hidden');
+      });
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('section-hidden');
+
+      // update mobile/desktop nav active states
+      document.querySelectorAll('.nav-link, .mobile-nav').forEach(btn => {
+        if (btn.dataset.section === id) {
+          btn.classList.add('bg-indigo-50', 'dark:bg-slate-700');
+          btn.classList.remove('text-slate-500');
+          // highlight icon/text inside mobile nav
+          btn.querySelectorAll('svg, span').forEach(child => child.classList.add('text-indigo-600'));
+        } else {
+          btn.classList.remove('bg-indigo-50', 'dark:bg-slate-700');
+          btn.querySelectorAll('svg, span').forEach(child => child.classList.remove('text-indigo-600'));
+        }
+      });
+
+      // render fresh for the section
+      if (id === 'dashboard') renderDashboard();
+      if (id === 'schedule') renderSchedule();
+      if (id === 'assignments') renderAssignments();
+      if (id === 'settings') renderSettings();
+    }
+
+    // Rendering
+    function renderDashboard() {
+      // Greeting
+      const hour = new Date().getHours();
+      let greet = 'Hello';
+      if (hour < 12) greet = 'Good morning';
+      else if (hour < 18) greet = 'Good afternoon';
+      else greet = 'Good evening';
+      document.getElementById('greeting').textContent = `${greet}, Alex!`;
+
+      document.getElementById('today-date').textContent = new Date().toLocaleDateString();
+      // Today's classes - use getDay() mapping
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const weekday = dayNames[new Date().getDay()];
+      const todayList = classes.filter(c => c.day === weekday).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+      const container = document.getElementById('today-classes-list');
+      container.innerHTML = '';
+      if (todayList.length === 0) {
+        container.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-300">No classes today.</div>';
+      } else {
+        todayList.forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 flex items-center justify-between';
+          card.innerHTML = `
+            <div>
+              <div class="font-semibold">${escapeHtml(c.subject)}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-300">${escapeHtml(c.teacher)} • ${escapeHtml(c.room)}</div>
+            </div>
+            <div class="text-sm text-indigo-600 font-medium">${escapeHtml(c.startTime)} - ${escapeHtml(c.endTime)}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // Assignments due soon (next 7 days)
+      const dueSoon = assignments.filter(a => inNextNDays(a.dueDate, 7)).sort((x,y)=>x.dueDate.localeCompare(y.dueDate));
+      const dueContainer = document.getElementById('due-soon-list');
+      dueContainer.innerHTML = '';
+      if (dueSoon.length === 0) {
+        dueContainer.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-300">No upcoming assignments in the next 7 days.</div>';
+      } else {
+        dueSoon.forEach(a => {
+          const overdueClass = (isOverdue(a.dueDate) && !a.completed) ? 'text-red-500' : 'text-slate-600 dark:text-slate-300';
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 flex items-center justify-between';
+          card.innerHTML = `
+            <div>
+              <div class="font-semibold ${a.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(a.title)}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-300">${escapeHtml(a.subject)}</div>
+            </div>
+            <div class="text-right">
+              <div class="${overdueClass} font-medium">${formatDateISOToPretty(a.dueDate)}</div>
+              <div class="text-xs text-slate-400">${a.completed ? 'Completed' : 'Due'}</div>
+            </div>
+          `;
+          dueContainer.appendChild(card);
+        });
+      }
+    }
+
+    function renderSchedule() {
+      // day selector
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const selector = document.getElementById('day-selector');
+      selector.innerHTML = '';
+      days.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-2 rounded-lg ${d===selectedDay ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'}`;
+        btn.textContent = d.slice(0,3);
+        btn.title = d;
+        btn.addEventListener('click', () => {
+          selectedDay = d;
+          renderSchedule();
+        });
+        selector.appendChild(btn);
+      });
+
+      const list = document.getElementById('classes-for-day');
+      list.innerHTML = '';
+      const dayClasses = classes.filter(c => c.day === selectedDay).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+      if (dayClasses.length === 0) {
+        list.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-300">No classes for this day.</div>';
+      } else {
+        dayClasses.forEach(c => {
+          const item = document.createElement('div');
+          item.className = 'rounded-2xl bg-white dark:bg-slate-800 p-4 shadow flex items-center justify-between';
+          item.innerHTML = `
+            <div>
+              <div class="font-semibold text-indigo-600">${escapeHtml(c.subject)}</div>
+              <div class="text-sm text-slate-500 dark:text-slate-300">${escapeHtml(c.teacher)} • ${escapeHtml(c.room)}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-sm text-slate-700 dark:text-slate-200 mr-2">${escapeHtml(c.startTime)} - ${escapeHtml(c.endTime)}</div>
+              <button class="edit-class px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-sm" data-id="${c.id}">Edit</button>
+              <button class="delete-class px-2 py-1 rounded bg-red-100 text-red-600 text-sm" data-id="${c.id}">Delete</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      // wire edit / delete
+      document.querySelectorAll('.edit-class').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.dataset.id;
+          openClassModalForEdit(id);
+        });
+      });
+      document.querySelectorAll('.delete-class').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.dataset.id;
+          if (confirm('Delete this class?')) {
+            deleteClassById(id);
+            renderSchedule();
+            if (!document.getElementById('dashboard').classList.contains('section-hidden')) renderDashboard();
+          }
+        });
+      });
+    }
+
+    function renderAssignments() {
+      // filters UI active class
+      document.querySelectorAll('.assign-filter').forEach(btn => {
+        if (btn.dataset.filter === assignmentFilter) {
+          btn.classList.add('bg-indigo-600','text-white');
+          btn.classList.remove('bg-slate-100','dark:bg-slate-700');
+        } else {
+          btn.classList.remove('bg-indigo-600','text-white');
+          btn.classList.add('bg-slate-100','dark:bg-slate-700');
+        }
+      });
+
+      const list = document.getElementById('assignments-list');
+      list.innerHTML = '';
+      let listData = assignments.slice().sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+      if (assignmentFilter === 'pending') listData = listData.filter(a => !a.completed);
+      if (assignmentFilter === 'completed') listData = listData.filter(a => a.completed);
+
+      if (listData.length === 0) {
+        list.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-300">No assignments.</div>';
+        return;
+      }
+
+      listData.forEach(a => {
+        const overdue = isOverdue(a.dueDate) && !a.completed;
+        const card = document.createElement('div');
+        card.className = 'p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-start justify-between';
+        card.innerHTML = `
+          <div class="flex items-start gap-3">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" class="assign-check" data-id="${a.id}" ${a.completed ? 'checked' : ''} />
+            </label>
+            <div>
+              <div class="font-semibold ${a.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(a.title)}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-300">${escapeHtml(a.subject)} • ${escapeHtml(a.description || '')}</div>
+            </div>
+          </div>
+          <div class="text-right flex flex-col items-end gap-2">
+            <div class="${overdue ? 'text-red-500 font-bold' : 'text-slate-600 dark:text-slate-300'}">${formatDateISOToPretty(a.dueDate)}</div>
+            <div class="flex gap-2">
+              <button class="delete-assignment text-sm px-2 py-1 rounded bg-red-100 text-red-600" data-id="${a.id}">Delete</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      // events
+      document.querySelectorAll('.assign-check').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const id = e.currentTarget.dataset.id;
+          markAssignmentComplete(id, e.currentTarget.checked);
+        });
+      });
+
+      document.querySelectorAll('.delete-assignment').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.dataset.id;
+          if (confirm('Delete this assignment?')) {
+            assignments = assignments.filter(a => a.id !== id);
+            saveAssignments();
+            renderAssignments();
+            if (!document.getElementById('dashboard').classList.contains('section-hidden')) renderDashboard();
+          }
+        });
+      });
+    }
+
+    function renderSettings() {
+      // nothing much, but ensure toggle button reflects state
+      // handled by syncThemeUI()
+    }
+
+    // class modal operations
+    function openAddClassModal() {
+      document.getElementById('class-modal-title').textContent = 'Add Class';
+      document.getElementById('class-id').value = '';
+      document.getElementById('class-day').value = selectedDay || 'Monday';
+      document.getElementById('class-start').value = '09:00';
+      document.getElementById('class-end').value = '10:00';
+      document.getElementById('class-subject').value = '';
+      document.getElementById('class-teacher').value = '';
+      document.getElementById('class-room').value = '';
+      document.getElementById('class-modal').classList.remove('hidden');
+      document.getElementById('class-modal').classList.add('flex');
+    }
+
+    function openClassModalForEdit(id) {
+      const it = classes.find(c => c.id === id);
+      if (!it) return;
+      document.getElementById('class-modal-title').textContent = 'Edit Class';
+      document.getElementById('class-id').value = it.id;
+      document.getElementById('class-day').value = it.day;
+      document.getElementById('class-start').value = it.startTime;
+      document.getElementById('class-end').value = it.endTime;
+      document.getElementById('class-subject').value = it.subject;
+      document.getElementById('class-teacher').value = it.teacher;
+      document.getElementById('class-room').value = it.room;
+      document.getElementById('class-modal').classList.remove('hidden');
+      document.getElementById('class-modal').classList.add('flex');
+    }
+
+    function closeClassModal() {
+      document.getElementById('class-modal').classList.add('hidden');
+      document.getElementById('class-modal').classList.remove('flex');
+    }
+
+    // assignment form submit
+    function handleAssignmentAdd(e) {
+      e.preventDefault();
+      const title = document.getElementById('a-title').value.trim();
+      if (!title) return;
+      const subject = document.getElementById('a-subject').value.trim();
+      const due = document.getElementById('a-due').value;
+      const desc = document.getElementById('a-desc').value.trim();
+      const newA = { id: cryptoRandomId(), title, subject, dueDate: due || '', description: desc, completed: false };
+      assignments.push(newA);
+      saveAssignments();
+      document.getElementById('assignment-form').reset();
+      renderAssignments();
+      if (!document.getElementById('dashboard').classList.contains('section-hidden')) renderDashboard();
+    }
+
+    // helper to escape HTML to avoid injection
+    function escapeHtml(s) {
+      if (!s) return '';
+      return s.replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+    }
+
+    // Dark mode
+    function applyThemeFromStorage() {
+      const dark = localStorage.getItem(KEY_DARK);
+      const isDark = dark === 'true';
+      if (isDark) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+      syncThemeUI();
+    }
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(KEY_DARK, isDark ? 'true' : 'false');
+      syncThemeUI();
+    }
+    function syncThemeUI(){
+      const isDark = document.documentElement.classList.contains('dark');
+      const iconSvg = (isDark) ?
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.485-12.485l-.707.707M5.222 18.364l-.707.707M21 12h-1M4 12H3m15.364 7.778l-.707-.707M6.343 5.636l-.707-.707" />' :
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />';
+      document.getElementById('top-dark-icon').innerHTML = iconSvg;
+      document.getElementById('mobile-dark-icon').innerHTML = iconSvg;
+    }
+
+    // Event wiring
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load data
+      loadData();
+      applyThemeFromStorage();
+
+      // initial section
+      showSection('dashboard');
+
+      // nav buttons
+      document.querySelectorAll('.nav-link').forEach(btn => {
+        btn.addEventListener('click', () => showSection(btn.dataset.section));
+      });
+      document.querySelectorAll('.mobile-nav').forEach(btn => {
+        btn.addEventListener('click', () => showSection(btn.dataset.section));
+      });
+
+      // mobile toggles
+      document.getElementById('mobile-dark-toggle').addEventListener('click', toggleTheme);
+      document.getElementById('top-dark-toggle').addEventListener('click', toggleTheme);
+      document.getElementById('sidebar-dark-toggle').addEventListener('click', toggleTheme);
+      document.getElementById('settings-dark-toggle').addEventListener('click', toggleTheme);
+
+      // open schedule shortcut from dashboard
+      document.getElementById('open-schedule').addEventListener('click', () => showSection('schedule'));
+
+      // schedule add button
+      document.getElementById('open-add-class').addEventListener('click', openAddClassModal);
+      document.getElementById('cancel-class').addEventListener('click', (e) => { e.preventDefault(); closeClassModal(); });
+      document.getElementById('class-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeClassModal();
+      });
+
+      // class form submit
+      document.getElementById('class-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('class-id').value;
+        const day = document.getElementById('class-day').value;
+        const start = document.getElementById('class-start').value;
+        const end = document.getElementById('class-end').value;
+        const subject = document.getElementById('class-subject').value.trim();
+        const teacher = document.getElementById('class-teacher').value.trim();
+        const room = document.getElementById('class-room').value.trim();
+        if (!subject) {
+          alert('Please enter a subject.');
+          return;
+        }
+        if (id) {
+          editClass(id, { day, startTime: start, endTime: end, subject, teacher, room });
+        } else {
+          addClass({ day, startTime: start, endTime: end, subject, teacher, room });
+        }
+        closeClassModal();
+        renderSchedule();
+        if (!document.getElementById('dashboard').classList.contains('section-hidden')) renderDashboard();
+      });
+
+      // assignment form
+      document.getElementById('assignment-form').addEventListener('submit', handleAssignmentAdd);
+
+      // assignment filters
+      document.querySelectorAll('.assign-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+          assignmentFilter = btn.dataset.filter;
+          renderAssignments();
+        });
+      });
+
+      // clear data
+      document.getElementById('clear-data').addEventListener('click', () => {
+        if (!confirm('Clear all EduTrack data? This will remove classes and assignments.')) return;
+        localStorage.removeItem(KEY_CLASSES);
+        localStorage.removeItem(KEY_ASSIGNMENTS);
+        classes = []; assignments = [];
+        renderDashboard(); renderSchedule(); renderAssignments();
+      });
+
+      // open dashboard on logo click (optional)
+      document.querySelectorAll('[data-section="dashboard"]').forEach(b => b.addEventListener('click', () => showSection('dashboard')));
+    });
+
+  </script>
+</body>
+</html>
