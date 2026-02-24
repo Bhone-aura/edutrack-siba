@@ -520,9 +520,6 @@ export default function App(){
             <button onClick={()=>setAssignFilter('all')} className={btnClass('all')} data-filter="all">All</button>
             <button onClick={()=>setAssignFilter('pending')} className={btnClass('pending')} data-filter="pending">Pending</button>
             <button onClick={()=>setAssignFilter('completed')} className={btnClass('completed')} data-filter="completed">Completed</button>
-            <div className="ml-auto text-sm text-slate-500 dark:text-slate-300">
-              <button onClick={()=>{ setSection('schedule'); setTimeout(()=>openAddClass(),100) }} className="px-4 py-2 rounded-lg bg-indigo-600 text-white">Add Assignment</button>
-            </div>
           </div>
 
           <form id="assignment-form" onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-2">
