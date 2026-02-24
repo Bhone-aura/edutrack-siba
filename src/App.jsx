@@ -36,7 +36,7 @@ export default function App(){
   const [showClassModal, setShowClassModal] = useState(false)
   const [editingClass, setEditingClass] = useState(null)
   const [assignFilter, setAssignFilter] = useState('all')
-  const [showAuthPage, setShowAuthPage] = useState(false)
+  const [showAuthPage, setShowAuthPage] = useState(true)
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
@@ -159,7 +159,7 @@ export default function App(){
   // seed sample on first load (create a demo user if nothing exists)
   useEffect(()=>{
     if (Object.keys(classesMap).length===0 && Object.keys(assignMap).length===0 && users.length===0) {
-      // demo user: do not persist plaintext password
+      // demo user: do not persist plaintext password and do not auto-login
       const demo = { id: uid(), username:'demo', dark:false, name: 'Demo User' }
       const dd = (d)=>String(d).padStart(2,'0')
       const today = new Date()
@@ -180,8 +180,8 @@ export default function App(){
         { id: uid(), title:'Reading: Chapter 4', subject:'English', dueDate:fmt(in6), description:'', completed:false },
         { id: uid(), title:'History Essay', subject:'History', dueDate:fmt(new Date(today.getFullYear(), today.getMonth(), today.getDate()-2)), description:'Submit final essay', completed:false }
       ]
+      // add demo user but do NOT set as current user so app opens at login
       setUsers([demo])
-      setCurrentUser(demo)
       setClassesMap({ [demo.id]: demoClasses })
       setAssignMap({ [demo.id]: demoAssign })
       setDark(false)

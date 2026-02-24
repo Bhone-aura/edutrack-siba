@@ -205,3 +205,53 @@ html:not(.dark) input[type="time"].bg-slate-50 {
   color: var(--et-text) !important;
   border-color: #e6edf3 !important;
 }
+
+/* Ensure light-mode color rules apply on desktop as well as mobile/tablet.
+   Make common background utilities render white and use dark text for readability. */
+html:not(.dark) header,
+html:not(.dark) aside,
+html:not(.dark) .bg-white,
+html:not(.dark) .bg-slate-50,
+html:not(.dark) .bg-slate-100,
+html:not(.dark) .dark\:bg-slate-800,
+html:not(.dark) .dark\:bg-slate-900,
+html:not(.dark) .rounded-2xl,
+html:not(.dark) .rounded-xl,
+html:not(.dark) .card {
+  background-color: var(--et-bg) !important;
+  color: var(--et-text) !important;
+  border-color: #eef2f7 !important;
+}
+
+/* Make utility backgrounds that previously were very light use pure white in light mode
+   (covers inputs, selects, textareas, and panels regardless of breakpoint) */
+html:not(.dark) .bg-slate-50,
+html:not(.dark) .bg-slate-100,
+html:not(.dark) .bg-white {
+  background-color: #ffffff !important;
+  color: var(--et-text) !important;
+  border-color: #e6edf3 !important;
+}
+
+/* Ensure elements that used text-white in Tailwind show dark text in light mode */
+html:not(.dark) .text-white,
+html:not(.dark) .text-slate-50,
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200 {
+  color: var(--et-text) !important;
+}
+
+/* Inputs/selects/time/textarea global rule for light mode */
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea,
+html:not(.dark) input[type="time"] {
+  background-color: #ffffff !important;
+  color: var(--et-text) !important;
+  border-color: #e6edf3 !important;
+}
+
+/* Remove any mobile-only exceptions by ensuring the mobile top bar rule also applies generally */
+html:not(.dark) .bg-white\/60 {
+  background-color: rgba(255,255,255,0.6) !important;
+}
