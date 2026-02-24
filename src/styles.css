@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -206,42 +207,40 @@ html:not(.dark) input[type="time"].bg-slate-50 {
   border-color: #e6edf3 !important;
 }
 
-/* Ensure light-mode color rules apply on desktop as well as mobile/tablet.
-   Make common background utilities render white and use dark text for readability. */
+/* Make desktop use the same mobile/tablet background & text colors
+   - Force common containers and utility backgrounds to mobile-style values
+   - Keeps dark mode unaffected (scoped under .dark)
+*/
+html:not(.dark) body,
+html:not(.dark) #root,
+html:not(.dark) main,
 html:not(.dark) header,
 html:not(.dark) aside,
 html:not(.dark) .bg-white,
 html:not(.dark) .bg-slate-50,
 html:not(.dark) .bg-slate-100,
-html:not(.dark) .dark\:bg-slate-800,
-html:not(.dark) .dark\:bg-slate-900,
-html:not(.dark) .rounded-2xl,
-html:not(.dark) .rounded-xl,
-html:not(.dark) .card {
-  background-color: var(--et-bg) !important;
+html:not(.dark) .bg-white\/60,
+html:not(.dark) .bg-white\/80 {
+  background-color: var(--et-card) !important; /* same subtle off-white as mobile */
   color: var(--et-text) !important;
   border-color: #eef2f7 !important;
 }
 
-/* Make utility backgrounds that previously were very light use pure white in light mode
-   (covers inputs, selects, textareas, and panels regardless of breakpoint) */
-html:not(.dark) .bg-slate-50,
-html:not(.dark) .bg-slate-100,
-html:not(.dark) .bg-white {
-  background-color: #ffffff !important;
-  color: var(--et-text) !important;
-  border-color: #e6edf3 !important;
+/* Ensure semi-transparent mobile top bars keep their translucency on desktop */
+html:not(.dark) header.bg-white\/60,
+html:not(.dark) .bg-white\/60,
+html:not(.dark) .bg-white\/80 {
+  background-color: rgba(255,255,255,0.6) !important;
 }
 
-/* Ensure elements that used text-white in Tailwind show dark text in light mode */
+/* Buttons and small panels: ensure dark text on light backgrounds */
 html:not(.dark) .text-white,
 html:not(.dark) .text-slate-50,
-html:not(.dark) .text-slate-100,
-html:not(.dark) .text-slate-200 {
+html:not(.dark) .text-slate-100 {
   color: var(--et-text) !important;
 }
 
-/* Inputs/selects/time/textarea global rule for light mode */
+/* Inputs & form controls already set earlier, but ensure desktop picks same rules */
 html:not(.dark) input,
 html:not(.dark) select,
 html:not(.dark) textarea,
@@ -250,3 +249,5 @@ html:not(.dark) input[type="time"] {
   color: var(--et-text) !important;
   border-color: #e6edf3 !important;
 }
+
+/* end mobile-colors-on-desktop */

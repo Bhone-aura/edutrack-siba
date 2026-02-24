@@ -36,7 +36,7 @@ export default function App(){
   const [showClassModal, setShowClassModal] = useState(false)
   const [editingClass, setEditingClass] = useState(null)
   const [assignFilter, setAssignFilter] = useState('all')
-  const [showAuthPage, setShowAuthPage] = useState(true)
+  const [showAuthPage, setShowAuthPage] = useState(false)
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
@@ -71,11 +71,10 @@ export default function App(){
 
   // simple auth helpers
   function register(username, password, name){
-    if(!username) return alert('Username required')
+    if(!username || !password) return alert('Username and password required')
     if(users.find(u=>u.username===username)) return alert('Username already exists')
     const displayName = name?.trim() || username
-    // Do NOT store plaintext password in localStorage. Store minimal profile only.
-    const user = { id: uid(), username, dark:false, name: displayName }
+    const user = { id: uid(), username, password, dark:false, name: displayName }
     setUsers(prev=>[...prev, user])
     // initialize empty maps for this user
     setClassesMap(prev=>({ ...prev, [user.id]: [] }))
@@ -84,21 +83,13 @@ export default function App(){
     alert('Registered and logged in as ' + username)
   }
   function login(username, password){
-    // If a stored user has a password (legacy), verify it. Otherwise allow login by username only.
-    const user = users.find(u=> u.username===username && (u.password? u.password===password : true))
+    const user = users.find(u=>u.username===username && u.password===password)
     if(!user) return alert('Invalid credentials')
-    // ensure we don't persist password into currentUser/localStorage
-    const safeUser = { ...user }
-    if(safeUser.password) delete safeUser.password
-    setCurrentUser(safeUser)
+    setCurrentUser(user)
     setDark(!!user.dark)
     alert('Logged in as ' + username)
   }
   function logout(){ setCurrentUser(null); setDark(false); alert('Logged out') }
-
-  // small prompt-based UI handlers (quick implementation)
-  function handleRegisterPrompt(){ const u = prompt('Choose a username'); if(!u) return; const n = prompt('Enter a display name (optional)'); register(u, null, n) }
-  function handleLoginPrompt(){ const u = prompt('Username'); if(!u) return; const p = prompt('Password (if set)'); login(u,p) }
 
   // Full-screen Auth page (Google-like design)
   function AuthScreen(){
@@ -159,32 +150,12 @@ export default function App(){
   // seed sample on first load (create a demo user if nothing exists)
   useEffect(()=>{
     if (Object.keys(classesMap).length===0 && Object.keys(assignMap).length===0 && users.length===0) {
-      // demo user: do not persist plaintext password and do not auto-login
-      const demo = { id: uid(), username:'demo', dark:false, name: 'Demo User' }
-      const dd = (d)=>String(d).padStart(2,'0')
       const today = new Date()
-      const fmt = (d)=>`${d.getFullYear()}-${dd(d.getMonth()+1)}-${dd(d.getDate())}`
       const tomorrow = new Date(); tomorrow.setDate(today.getDate()+1)
       const in3 = new Date(); in3.setDate(today.getDate()+3)
       const in6 = new Date(); in6.setDate(today.getDate()+6)
-      const demoClasses = [
-        { id: uid(), day:'Monday', startTime:'08:30', endTime:'09:15', subject:'Math', teacher:'Ms. Rivera', room:'101' },
-        { id: uid(), day:'Tuesday', startTime:'10:00', endTime:'11:00', subject:'Science', teacher:'Mr. Lee', room:'Lab' },
-        { id: uid(), day:'Wednesday', startTime:'13:00', endTime:'14:00', subject:'History', teacher:'Ms. Patel', room:'202' },
-        { id: uid(), day:'Thursday', startTime:'09:00', endTime:'10:00', subject:'English', teacher:'Mrs. Gomez', room:'101' },
-        { id: uid(), day:'Friday', startTime:'11:00', endTime:'12:00', subject:'Art', teacher:'Mr. Kim', room:'Art Studio' }
-      ]
-      const demoAssign = [
-        { id: uid(), title:'Algebra Homework', subject:'Math', dueDate:fmt(tomorrow), description:'Complete problems 1–20', completed:false },
-        { id: uid(), title:'Lab Report', subject:'Science', dueDate:fmt(in3), description:'Write lab findings', completed:false },
-        { id: uid(), title:'Reading: Chapter 4', subject:'English', dueDate:fmt(in6), description:'', completed:false },
-        { id: uid(), title:'History Essay', subject:'History', dueDate:fmt(new Date(today.getFullYear(), today.getMonth(), today.getDate()-2)), description:'Submit final essay', completed:false }
-      ]
-      // add demo user but do NOT set as current user so app opens at login
-      setUsers([demo])
-      setClassesMap({ [demo.id]: demoClasses })
-      setAssignMap({ [demo.id]: demoAssign })
-      setDark(false)
+    // Intentionally do not create a demo user — start on the auth/login screen
+    // Leave users  /classes/assignments empty so the app opens at the login/register page
     }
   }, [])
 
@@ -344,67 +315,18 @@ export default function App(){
 
   // topbar / sidebar / mobile bottom nav UI
   function Sidebar(){
-    return (
-      <aside className="hidden md:flex md:flex-col md:w-64 bg-white/60 dark:bg-slate-800/60 border-r border-slate-200 dark:border-slate-700 p-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">ET</div>
-          <div>
-            <div className="font-semibold">EduTrack</div>
-            <div className="text-sm text-slate-500 dark:text-slate-300">School Organizer</div>
-          </div>
-        </div>
-        <nav className="flex-1 space-y-2">
-          {[['dashboard','Home'],['schedule','Schedule'],['assignments','Assignments'],['settings','Settings']].map(([id,label])=> (
-            <button key={id} onClick={()=>setSection(id)} data-section={id} className={`w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center gap-3 ${section===id? 'bg-indigo-50 dark:bg-slate-700': ''}`}>
-              <span className="text-indigo-600 font-medium">{label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="mt-6 text-sm text-slate-500 dark:text-slate-300">
-          <div>{currentUser?.username || 'Guest'}</div>
-          <div className="mt-2">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <button onClick={()=>setDark(!dark)} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Toggle theme">Theme</button>
-                <button onClick={logout} className="px-2 py-1 rounded bg-red-100 text-red-600 text-xs">Logout</button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button onClick={()=>{ setAuthMode('login'); setShowAuthPage(true) }} className="px-2 py-1 rounded bg-indigo-600 text-white text-xs">Login</button>
-                <button onClick={()=>{ setAuthMode('register'); setShowAuthPage(true) }} className="px-2 py-1 rounded bg-slate-100 text-xs">Register</button>
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
-    )
+    // removed desktop sidebar to use the mobile header for all sizes
+    return null
   }
 
   function Topbar(){
-    return (
-      <header className="hidden md:flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
-        <div className="flex items-center gap-4">
-          <div className="text-2xl font-bold text-indigo-600">EduTrack</div>
-          <div className="text-sm text-slate-500 dark:text-slate-300">Organize your school life</div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 text-sm">
-            <div className="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">A</div>
-            <div className="text-slate-600 dark:text-slate-300">{currentUser?.username || 'Guest'}</div>
-          </div>
-          <button onClick={()=>setDark(!dark)} id="top-dark-toggle" className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700">
-            <svg className="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {dark? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m8.485-12.485l-.707.707M5.222 18.364l-.707.707M21 12h-1M4 12H3m15.364 7.778l-.707-.707M6.343 5.636l-.707-.707"/> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>}
-            </svg>
-          </button>
-        </div>
-      </header>
-    )
+    // removed desktop topbar — MobileTop will be used for all sizes
+    return null
   }
 
   function MobileTop(){
     return (
-      <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
         <button onClick={()=>setMobileNavOpen(true)} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Open navigation">
           <svg className="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
@@ -432,7 +354,7 @@ export default function App(){
   function MobileNavOverlay(){
     if(!mobileNavOpen) return null
     return (
-      <div className="fixed inset-0 z-50 md:hidden flex">
+      <div className="fixed inset-0 z-50 flex">
         <div className="absolute inset-0 bg-black/40" onClick={()=>setMobileNavOpen(false)} />
         <div className="relative w-64 bg-white dark:bg-slate-800 p-4 shadow-lg">
           <div className="flex items-center justify-between mb-4">
@@ -650,7 +572,7 @@ export default function App(){
               <div className="text-xs text-slate-400 dark:text-slate-400">Toggle persistent dark theme</div>
             </div>
             <div className="ml-auto">
-              <button id="settings-dark-toggle" onClick={()=>setDark(!dark)} className="px-3 py-2 rounded-lg bg-indigo-600 text-white">Toggle Dark</button>
+              <button id="settings-dark-toggle" onClick={()=>setDark(!dark)} className="px-3 py-2 rounded-lg bg-indigo-600 text-white">{dark ? 'Toggle Light' : 'Toggle Dark'}</button>
             </div>
           </div>
           <div className="mb-4">
