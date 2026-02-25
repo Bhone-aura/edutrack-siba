@@ -5,7 +5,7 @@ const KEY_CURRENT = 'edutrack_current_user'
 const KEY_CLASSES_MAP = 'edutrack_classes_map'
 const KEY_ASSIGN_MAP = 'edutrack_assignments_map'
 const KEY_DARK = 'edutrack_dark' // kept for backward compatibility
-const DEFAULT_DARK = false // force initial theme: false = light, true = dark
+const DEFAULT_DARK = true // force initial theme: true = dark (light mode temporarily disabled)
 
 function useLocalStorage(key, initial) {
   const [state, setState] = useState(() => {
@@ -74,7 +74,7 @@ export default function App(){
     if(!username || !password) return alert('Username and password required')
     if(users.find(u=>u.username===username)) return alert('Username already exists')
     const displayName = name?.trim() || username
-    const user = { id: uid(), username, password, dark:false, name: displayName }
+    const user = { id: uid(), username, password, dark:true, name: displayName }
     setUsers(prev=>[...prev, user])
     // initialize empty maps for this user
     setClassesMap(prev=>({ ...prev, [user.id]: [] }))
@@ -89,7 +89,7 @@ export default function App(){
     setDark(!!user.dark)
     alert('Logged in as ' + username)
   }
-  function logout(){ setCurrentUser(null); setDark(false); alert('Logged out') }
+  function logout(){ setCurrentUser(null); setDark(true); alert('Logged out') }
 
   // Full-screen Auth page (Google-like design)
   function AuthScreen(){
@@ -326,7 +326,7 @@ export default function App(){
 
   function MobileTop(){
     return (
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-et-top text-et-text">
         <button onClick={()=>setMobileNavOpen(true)} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Open navigation">
           <svg className="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
@@ -379,7 +379,8 @@ export default function App(){
           <div className="mt-6 text-sm text-slate-500 dark:text-slate-300">
             {currentUser ? (
               <div className="flex items-center gap-2">
-                <button onClick={()=>{ setDark(!dark); setMobileNavOpen(false) }} className="px-2 py-1 rounded bg-slate-100 text-xs">Theme</button>
+                {/* Theme toggle disabled temporarily: force dark mode */}
+                <button onClick={()=>{ setDark(true); setMobileNavOpen(false) }} className="px-2 py-1 rounded bg-slate-100 text-xs opacity-70 cursor-not-allowed" title="Light mode disabled">Theme</button>
                 <button onClick={()=>{ logout(); setMobileNavOpen(false) }} className="px-2 py-1 rounded bg-red-100 text-red-600 text-xs">Logout</button>
               </div>
             ) : (
